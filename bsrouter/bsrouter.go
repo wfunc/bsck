@@ -17,7 +17,7 @@ import (
 )
 
 // Version is bsrouter version
-const Version = "2.0.0"
+const Version = router.Version
 
 var exitf = func(code int) {
 	os.Exit(code)

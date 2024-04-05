@@ -29,7 +29,7 @@ import (
 )
 
 // Version is bsrouter version
-const Version = "2.0.0"
+const Version = router.Version
 
 var stdin = os.Stdin
 var stdout = os.Stdout
