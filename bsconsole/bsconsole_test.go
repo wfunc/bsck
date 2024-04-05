@@ -98,6 +98,11 @@ var configTestCaller = `
 }
 `
 
+func runall(args ...string) {
+	os.Args = args
+	start()
+}
+
 func TestConsole(t *testing.T) {
 	usr, _ := user.Current()
 	env = append(env, "HOME="+usr.HomeDir)

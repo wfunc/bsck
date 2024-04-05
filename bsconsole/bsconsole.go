@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"encoding/json"
+	"flag"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -83,26 +84,30 @@ func usage() {
 	fmt.Fprintf(stderr, "\n")
 }
 
-func main() {
-	runall(os.Args...)
-}
-
 var env []string
 
-func runall(osArgs ...string) {
-	for _, arg := range osArgs {
-		if arg == "-v" {
-			fmt.Printf("%v\n", Version)
-			return
-		}
-		if arg == "-h" || arg == "--help" {
-			usage()
-			return
-		}
-	}
+func main() {
+	start()
+}
+
+func start() {
+	var version, help bool
+	var slaverURI string
 	var command string
 	var args []string
-	var slaverURI string
+	flag.BoolVar(&version, "version", false, "show version")
+	flag.BoolVar(&help, "help", false, "show help")
+	flag.StringVar(&slaverURI, "slaver", "", "slaver uri")
+	flag.Parse()
+	if version {
+		fmt.Printf("%v\n", Version)
+		return
+	}
+	if help {
+		usage()
+		return
+	}
+
 	runner, err := os.Executable()
 	if err != nil {
 		fmt.Printf("%v\n", err)
@@ -110,9 +115,9 @@ func runall(osArgs ...string) {
 		return
 	}
 	dir := filepath.Dir(runner)
-	_, fn := filepath.Split(osArgs[0])
+	_, fn := filepath.Split(runner)
 	fn = strings.TrimSuffix(fn, ".exe")
-	args = osArgs[1:]
+	args = flag.Args()
 
 	if strings.HasPrefix(fn, "bs-") {
 		command = strings.TrimPrefix(fn, "bs-")
@@ -138,7 +143,7 @@ func runall(osArgs ...string) {
 	case "install":
 		fmt.Printf("start install command\n")
 		var err error
-		filename, _ := filepath.Abs(osArgs[0])
+		filename, _ := filepath.Abs(runner)
 		filedir, _ := filepath.Split(filename)
 		err = mklink(filepath.Join(filedir, "bs-conn"), filename)
 		if err != nil {
@@ -199,7 +204,7 @@ func runall(osArgs ...string) {
 		return
 	case "uninstall":
 		fmt.Printf("start uninstall command\n")
-		filename, _ := filepath.Abs(osArgs[0])
+		filename, _ := filepath.Abs(runner)
 		filedir, _ := filepath.Split(filename)
 		removeFile(filepath.Join(filedir, "bs-conn"))
 		removeFile(filepath.Join(filedir, "bs-forward"))
@@ -653,13 +658,13 @@ func loopCommand(console *router.Console, name string, on func(cmd string, args 
 	for {
 		conn, err := console.Dial("tcp://" + name)
 		if err != nil {
-			fmt.Printf("dial to cmd channel fail with %v\n", err)
+			fmt.Printf("dial to cmd channel %v fail with %v\n", name, err)
 			time.Sleep(3 * time.Second)
 			continue
 		}
-		fmt.Printf("dial to cmd channel fail with %v\n", err)
+		fmt.Printf("dial to cmd channel %v success\n", name)
 		err = procCommand(conn, on)
-		fmt.Printf("read cmd channel fail with %v\n", err)
+		fmt.Printf("read cmd channel stopped with %v\n", err)
 	}
 }
 
