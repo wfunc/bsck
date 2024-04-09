@@ -140,7 +140,11 @@ func main() {
 		panic(err)
 	}
 	wc := make(chan os.Signal, 1)
-	signal.Notify(wc, os.Interrupt, syscall.SIGTERM)
+	signal.Notify(wc,
+		syscall.SIGHUP,
+		syscall.SIGINT,
+		syscall.SIGTERM,
+		syscall.SIGQUIT)
 	<-wc
 	service.Stop()
 }
