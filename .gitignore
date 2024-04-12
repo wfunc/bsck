@@ -49,3 +49,5 @@ bsconsole/bsrouter.pem
 app/macos/Bsrouter.xcframework
 app/bsrouter.key
 app/bsrouter.pem
+app/android/app/libs/bsrouter-sources.jar
+app/android/app/libs/bsrouter.aar

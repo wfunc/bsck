@@ -1,5 +1,8 @@
-import 'package:app/vpn.dart';
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:wakelock/wakelock.dart';
 
 void main() {
   runApp(const MyApp());
@@ -56,10 +59,70 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
+  static const platform = MethodChannel('com.github.codingeasygo/bsrouter');
+  static const config = """
+{
+    "name": "test0",
+    "listen": "tls://:3023",
+    "cert": "bsrouter.pem",
+    "key": "bsrouter.key",
+    "console": {
+        "unix": "none"
+    },
+    "acl": {},
+    "access": [
+        [
+            ".*",
+            ".*"
+        ]
+    ],
+    "dialer": {
+        "std": 1,
+        "ssh": 1
+    },
+    "forwards": {},
+    "channels": {
+        "share.h": {
+            "enabled": 1,
+            "remote": "tls://192.168.1.3:3023",
+            "token": "Abc123",
+            "tls_verify": 0
+        }
+    },
+    "showlog": 0,
+    "logflags": 16
+}
+""";
 
-  void _incrementCounter() {
-    VPN.config(VpnConfig.testHK());
+  String _titleText = "None";
+  String _stateText = "";
+  Timer? _timer;
+
+  void _start() async {
+    await platform.invokeMethod("start", {"config": config});
+    _state();
+  }
+
+  void _state() async {
+    var n = await platform.invokeMethod("name");
+    var s = await platform.invokeMethod("state");
+    setState(() {
+      _titleText = n;
+      _stateText = s;
+    });
+  }
+
+  void _timeout(Timer _) {
+    _state();
+  }
+
+  @override
+  void initState() {
+    _timer?.cancel();
+    _timer = Timer.periodic(const Duration(seconds: 3), _timeout);
+    Wakelock.enable();
+    _start();
+    super.initState();
   }
 
   @override
@@ -78,7 +141,7 @@ class _MyHomePageState extends State<MyHomePage> {
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         // Here we take the value from the MyHomePage object that was created by
         // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
+        title: Text(_titleText),
       ),
       body: Center(
         // Center is a layout widget. It takes a single child and positions it
@@ -99,20 +162,9 @@ class _MyHomePageState extends State<MyHomePage> {
           // wireframe for each widget.
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
-            ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
+            Text(_stateText),
           ],
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
       ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }

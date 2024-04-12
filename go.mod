@@ -37,6 +37,6 @@ require (
 
 replace gvisor.dev/gvisor v0.0.0-20231202080848-1f7806d17489 => github.com/codingeasygo/gvisor v0.0.0-20231203111534-4a1d1d9214fa
 
-replace github.com/codingeasygo/tun2conn => ../tun2conn
+// replace github.com/codingeasygo/tun2conn => ../tun2conn
 
 // replace github.com/codingeasygo/util => ../util

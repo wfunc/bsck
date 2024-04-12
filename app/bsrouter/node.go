@@ -185,3 +185,87 @@ func StopNode() {
 		globalWhiltelist = nil
 	}
 }
+
+func StartService(config string) (res Result) {
+	if globalService != nil {
+		res = newCodeResult(0, "running")
+		return
+	}
+	var err error
+	conf := &router.Config{}
+	if strings.HasPrefix(config, "{") {
+		err = json.Unmarshal([]byte(config), conf)
+	} else {
+		var data []byte
+		data, err = os.ReadFile(config)
+		if err == nil {
+			err = json.Unmarshal(data, conf)
+		}
+	}
+	if err != nil {
+		router.ErrorLog("Gateway prase config error %v by \n %v", err, conf)
+		lastError = err
+		res = newCodeResult(-1, err.Error())
+		return
+	}
+	conf.Dir = globalWorkDir
+	if _, xerr := os.Stat(filepath.Join(conf.Dir, "bsrouter.key")); os.IsNotExist(xerr) {
+		rootCert, rootKey, rootCertPEM, rootKeyPEM, xerr := xcrypto.GenerateRootCA([]string{"bsrouter"}, "bsrouter", 2048)
+		if xerr != nil {
+			lastError = xerr
+			res = newCodeResult(-1, err.Error())
+			return
+		}
+		_, _, certPEM, keyPEM, xerr := xcrypto.GenerateCert(rootCert, rootKey, nil, []string{"bsrouter"}, "bsrouter", []string{"bsrouter"}, nil, 2048)
+		if xerr != nil {
+			lastError = xerr
+			res = newCodeResult(-1, err.Error())
+			return
+		}
+		xerr = os.WriteFile(filepath.Join(conf.Dir, "rootCA.key"), rootKeyPEM, os.ModePerm)
+		if xerr != nil {
+			lastError = xerr
+			res = newCodeResult(-1, err.Error())
+			return
+		}
+		xerr = os.WriteFile(filepath.Join(conf.Dir, "rootCA.pem"), rootCertPEM, os.ModePerm)
+		if xerr != nil {
+			lastError = xerr
+			res = newCodeResult(-1, err.Error())
+			return
+		}
+		xerr = os.WriteFile(filepath.Join(conf.Dir, "bsrouter.key"), keyPEM, os.ModePerm)
+		if xerr != nil {
+			lastError = xerr
+			res = newCodeResult(-1, err.Error())
+			return
+		}
+		xerr = os.WriteFile(filepath.Join(conf.Dir, "bsrouter.pem"), certPEM, os.ModePerm)
+		if xerr != nil {
+			lastError = xerr
+			res = newCodeResult(-1, err.Error())
+			return
+		}
+		router.InfoLog("Node create cert on %v by bsrouter.key/bsrouter.pem", conf.Dir)
+	}
+	service := router.NewService()
+	service.Config = conf
+	xerr := service.Start()
+	if xerr != nil {
+		lastError = xerr
+		res = newCodeResult(-1, err.Error())
+		return
+	}
+	globalDialer = service
+	globalService = service
+	return
+}
+
+func StopService() {
+	if globalService != nil {
+		globalService.Stop()
+		globalService = nil
+		globalDialer = nil
+		globalWhiltelist = nil
+	}
+}

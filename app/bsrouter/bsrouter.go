@@ -1,6 +1,8 @@
 package bsrouter
 
 import (
+	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	_ "net/http/pprof"
@@ -8,8 +10,6 @@ import (
 	"github.com/codingeasygo/bsck/dialer"
 	"github.com/codingeasygo/bsck/router"
 	t2clog "github.com/codingeasygo/tun2conn/log"
-	"github.com/codingeasygo/util/converter"
-	"github.com/codingeasygo/util/xmap"
 
 	_ "golang.org/x/mobile/bind"
 )
@@ -116,12 +116,18 @@ func (v *valueResult) StringValue() string {
 }
 
 func State() (state string) {
-	nodeState := xmap.M{}
-	nodeState["code"] = 0
-	nodeState["name"] = "nodeName"
-	if lastError != nil {
-		nodeState["debug"] = lastError.Error()
+	if globalService == nil || globalService.Node == nil {
+		return fmt.Sprintf("NOT START:%v", lastError)
 	}
-	state = converter.JSON(nodeState)
+	s := globalService.Node.State()
+	data, _ := json.MarshalIndent(s, "", " ")
+	state = string(data)
 	return
+}
+
+func Name() (name string) {
+	if globalService == nil {
+		return "NOT START"
+	}
+	return globalService.Name
 }

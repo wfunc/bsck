@@ -1,0 +1,31 @@
+{
+    "name": "test0",
+    "listen": "tls://:3023",
+    "cert": "bsrouter.pem",
+    "key": "bsrouter.key",
+    "console": {
+        "unix": "none"
+    },
+    "acl": {},
+    "access": [
+        [
+            ".*",
+            ".*"
+        ]
+    ],
+    "dialer": {
+        "std": 1,
+        "ssh": 1
+    },
+    "forwards": {},
+    "channels": {
+        "sxba": {
+            "enabled": 1,
+            "remote": "tls://192.168.1.3:3023",
+            "token": "Abc123",
+            "tls_verify": 0
+        }
+    },
+    "showlog": 0,
+    "logflags": 16
+}
