@@ -253,7 +253,7 @@ func StartService(config string) (res Result) {
 	xerr := service.Start()
 	if xerr != nil {
 		lastError = xerr
-		res = newCodeResult(-1, err.Error())
+		res = newCodeResult(-1, xerr.Error())
 		return
 	}
 	globalDialer = service
