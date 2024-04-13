@@ -17,7 +17,7 @@ import (
 )
 
 // Version is bsrouter version
-const Version = "2.0.0"
+const Version = router.Version
 
 var exitf = func(code int) {
 	os.Exit(code)
@@ -140,7 +140,11 @@ func main() {
 		panic(err)
 	}
 	wc := make(chan os.Signal, 1)
-	signal.Notify(wc, os.Interrupt, syscall.SIGTERM)
+	signal.Notify(wc,
+		syscall.SIGHUP,
+		syscall.SIGINT,
+		syscall.SIGTERM,
+		syscall.SIGQUIT)
 	<-wc
 	service.Stop()
 }
