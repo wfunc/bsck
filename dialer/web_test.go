@@ -8,8 +8,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/codingeasygo/util/xhttp"
-	"github.com/codingeasygo/util/xmap"
+	"github.com/wfunc/util/xhttp"
+	"github.com/wfunc/util/xmap"
 )
 
 func TestWebDialer(t *testing.T) {

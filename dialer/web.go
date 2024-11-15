@@ -8,7 +8,7 @@ import (
 	"net/url"
 	"sync"
 
-	"github.com/codingeasygo/util/xmap"
+	"github.com/wfunc/util/xmap"
 	"golang.org/x/net/webdav"
 )
 

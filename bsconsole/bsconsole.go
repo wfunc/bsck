@@ -16,10 +16,10 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/codingeasygo/bsck/router"
-	"github.com/codingeasygo/util/proxy"
-	"github.com/codingeasygo/util/xhash"
-	"github.com/codingeasygo/util/xio"
+	"github.com/wfunc/bsck/router"
+	"github.com/wfunc/util/proxy"
+	"github.com/wfunc/util/xhash"
+	"github.com/wfunc/util/xio"
 )
 
 // Version is bsrouter version
@@ -504,9 +504,10 @@ func runall(osArgs ...string) {
 			fmt.Printf("Chrome proxy all to %v\n\n\n", listener.Addr())
 			runnerName = runnerPath
 			runnerArgs = append(runnerArgs, fmt.Sprintf("--proxy-server=socks5://%v", listener.Addr()))
-			runnerArgs = append(runnerArgs, fmt.Sprintf("--proxy-bypass-list=\"%v\"", "<-loopback>"))
+			// runnerArgs = append(runnerArgs, fmt.Sprintf("--proxy-bypass-list=\"%v\"", "<-loopback>"))
 			runnerArgs = append(runnerArgs, fmt.Sprintf("--user-data-dir=%v", dataDir))
 			runnerArgs = append(runnerArgs, args[1:]...)
+			fmt.Printf("Chrome proxy all to runnerArgs %v\n\n\n", runnerArgs)
 			return
 		})
 		fmt.Printf("Chrome done with %v\n", err)

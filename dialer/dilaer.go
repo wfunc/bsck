@@ -8,8 +8,8 @@ import (
 	"sync"
 	"sync/atomic"
 
-	"github.com/codingeasygo/util/converter"
-	"github.com/codingeasygo/util/xmap"
+	"github.com/wfunc/util/converter"
+	"github.com/wfunc/util/xmap"
 )
 
 type Pipable interface {

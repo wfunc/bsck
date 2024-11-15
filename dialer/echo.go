@@ -4,8 +4,8 @@ import (
 	"io"
 	"net/url"
 
-	"github.com/codingeasygo/util/xio"
-	"github.com/codingeasygo/util/xmap"
+	"github.com/wfunc/util/xio"
+	"github.com/wfunc/util/xmap"
 )
 
 // EchoDialer is an implementation of the Dialer interface for echo tcp connection.

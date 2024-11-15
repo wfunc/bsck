@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/codingeasygo/util/xmap"
+	"github.com/wfunc/util/xmap"
 )
 
 func init() {

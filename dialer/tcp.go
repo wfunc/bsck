@@ -5,7 +5,7 @@ import (
 	"net/url"
 	"regexp"
 
-	"github.com/codingeasygo/util/xmap"
+	"github.com/wfunc/util/xmap"
 )
 
 // TCPDialer is an implementation of the Dialer interface for dial tcp connections.

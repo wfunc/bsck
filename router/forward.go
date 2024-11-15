@@ -12,8 +12,8 @@ import (
 	"sync"
 	"sync/atomic"
 
-	"github.com/codingeasygo/bsck/dialer"
-	"github.com/codingeasygo/util/xmap"
+	"github.com/wfunc/bsck/dialer"
+	"github.com/wfunc/util/xmap"
 	"golang.org/x/net/websocket"
 )
 

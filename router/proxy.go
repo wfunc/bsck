@@ -16,12 +16,12 @@ import (
 	"sync"
 	"time"
 
-	"github.com/codingeasygo/bsck/dialer"
-	"github.com/codingeasygo/util/proxy"
-	"github.com/codingeasygo/util/xdebug"
-	"github.com/codingeasygo/util/xmap"
-	"github.com/codingeasygo/util/xnet"
 	"github.com/quic-go/quic-go"
+	"github.com/wfunc/bsck/dialer"
+	"github.com/wfunc/util/proxy"
+	"github.com/wfunc/util/xdebug"
+	"github.com/wfunc/util/xmap"
+	"github.com/wfunc/util/xnet"
 	nproxy "golang.org/x/net/proxy"
 	"golang.org/x/net/websocket"
 )

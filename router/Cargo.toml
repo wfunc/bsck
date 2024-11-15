@@ -31,7 +31,7 @@ rustls-pemfile = "1.0.2"
 webpki = { package = "rustls-webpki", version = "0.100.0", features = ["alloc", "std"] }
 webpki-roots = "0.23.0"
 rand = "0.8.5"
-smoltcp = { git = "https://github.com/codingeasygo/smoltcp", version = "0.9.1" }
+smoltcp = { git = "https://github.com/wfunc/smoltcp", version = "0.9.1" }
 tokio-fd = "0.3.0"
 cidr-utils = "0.5.10"
 regex = "1.8.4"

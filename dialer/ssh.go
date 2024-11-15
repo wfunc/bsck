@@ -7,11 +7,11 @@ import (
 	"net"
 	"net/url"
 
-	"github.com/codingeasygo/util/xhash"
-	"github.com/codingeasygo/util/xio"
-	"github.com/codingeasygo/util/xmap"
 	"github.com/gliderlabs/ssh"
 	"github.com/pkg/sftp"
+	"github.com/wfunc/util/xhash"
+	"github.com/wfunc/util/xio"
+	"github.com/wfunc/util/xmap"
 
 	gossh "golang.org/x/crypto/ssh"
 )

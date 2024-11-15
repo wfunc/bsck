@@ -5,7 +5,7 @@ import (
 	"io/ioutil"
 	"testing"
 
-	"github.com/codingeasygo/util/xmap"
+	"github.com/wfunc/util/xmap"
 )
 
 type StateData struct {

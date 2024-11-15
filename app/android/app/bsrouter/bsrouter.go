@@ -4,10 +4,10 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/codingeasygo/bsck/router"
-	"github.com/codingeasygo/util/converter"
-	"github.com/codingeasygo/util/xcrypto"
-	"github.com/codingeasygo/util/xmap"
+	"github.com/wfunc/bsck/router"
+	"github.com/wfunc/util/converter"
+	"github.com/wfunc/util/xcrypto"
+	"github.com/wfunc/util/xmap"
 
 	_ "golang.org/x/mobile/bind"
 )

@@ -7,10 +7,10 @@ import (
 	"net/http"
 	_ "net/http/pprof"
 
-	"github.com/codingeasygo/bsck/dialer"
-	"github.com/codingeasygo/util/xhttp"
-	"github.com/codingeasygo/util/xmap"
 	"github.com/codingeasygo/web"
+	"github.com/wfunc/bsck/dialer"
+	"github.com/wfunc/util/xhttp"
+	"github.com/wfunc/util/xmap"
 	"golang.org/x/net/websocket"
 )
 

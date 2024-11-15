@@ -10,8 +10,8 @@ import (
 	"path/filepath"
 	"syscall"
 
-	"github.com/codingeasygo/bsck/router"
-	"github.com/codingeasygo/util/xcrypto"
+	"github.com/wfunc/bsck/router"
+	"github.com/wfunc/util/xcrypto"
 )
 
 // Version is bsrouter version

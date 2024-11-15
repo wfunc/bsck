@@ -5,10 +5,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/codingeasygo/util/converter"
-	"github.com/codingeasygo/util/xdebug"
-	"github.com/codingeasygo/util/xio"
-	"github.com/codingeasygo/util/xmap"
+	"github.com/wfunc/util/converter"
+	"github.com/wfunc/util/xdebug"
+	"github.com/wfunc/util/xio"
+	"github.com/wfunc/util/xmap"
 )
 
 func newBaseProxy() (proxy0, proxy1 *Proxy, err error) {

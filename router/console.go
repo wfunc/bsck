@@ -16,14 +16,14 @@ import (
 	"sync"
 	"time"
 
-	"github.com/codingeasygo/bsck/dialer"
-	"github.com/codingeasygo/util/proxy"
-	sproxy "github.com/codingeasygo/util/proxy/socks"
-	wproxy "github.com/codingeasygo/util/proxy/ws"
-	"github.com/codingeasygo/util/xhttp"
-	"github.com/codingeasygo/util/xio"
-	"github.com/codingeasygo/util/xmap"
-	"github.com/codingeasygo/util/xtime"
+	"github.com/wfunc/bsck/dialer"
+	"github.com/wfunc/util/proxy"
+	sproxy "github.com/wfunc/util/proxy/socks"
+	wproxy "github.com/wfunc/util/proxy/ws"
+	"github.com/wfunc/util/xhttp"
+	"github.com/wfunc/util/xio"
+	"github.com/wfunc/util/xmap"
+	"github.com/wfunc/util/xtime"
 )
 
 type Hosts struct {
@@ -411,13 +411,16 @@ func (c *Console) StartProxy(loc, uri string) (server *proxy.Server, listener ne
 		}
 		return
 	}))
-	listener, err = server.Start(loc)
+	listener, err = server.Start("tcp", loc)
 	return
 }
 
 // Proxy will start shell by runner and rewrite all tcp connection by console
 func (c *Console) Proxy(uri string, process func(listener net.Listener) (err error)) (err error) {
+	fmt.Printf("111Console start proxy %v\n", uri)
 	server, listener, err := c.StartProxy("127.0.0.1:0", uri)
+	fmt.Printf("222Console start proxy %v %v\n", uri, err)
+
 	if err == nil {
 		c.locker.Lock()
 		c.running[fmt.Sprintf("%p", server)] = server
@@ -463,6 +466,7 @@ func (c *Console) ProxyProcess(uri string, stdin, stdout, stderr *os.File, prepa
 	err = c.Proxy(uri, func(listener net.Listener) (err error) {
 		env, runner, args, err := prepare(listener)
 		if err != nil {
+			fmt.Printf("Console proxy process %v fail with %v\n", uri, err)
 			return
 		}
 		// InfoLog("Console proxy process %v by\narg:%v\nenv:%v\n", runner, args, env)

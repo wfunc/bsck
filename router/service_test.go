@@ -16,14 +16,14 @@ import (
 	"testing"
 	"time"
 
-	"github.com/codingeasygo/bsck/dialer"
-	"github.com/codingeasygo/util/converter"
-	"github.com/codingeasygo/util/proxy/socks"
-	"github.com/codingeasygo/util/xhttp"
-	"github.com/codingeasygo/util/xio"
-	"github.com/codingeasygo/util/xmap"
 	"github.com/codingeasygo/web"
 	"github.com/codingeasygo/web/httptest"
+	"github.com/wfunc/bsck/dialer"
+	"github.com/wfunc/util/converter"
+	"github.com/wfunc/util/proxy/socks"
+	"github.com/wfunc/util/xhttp"
+	"github.com/wfunc/util/xio"
+	"github.com/wfunc/util/xmap"
 	"golang.org/x/crypto/ssh"
 )
 

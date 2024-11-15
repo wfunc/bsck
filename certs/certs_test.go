@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/codingeasygo/util/xmap"
+	"github.com/wfunc/util/xmap"
 )
 
 const CA = `

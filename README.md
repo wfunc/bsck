@@ -23,8 +23,8 @@ bond socket provider a server/client channel like ssh tunneling, it can forward 
 * install basic command
 
 ```.sh
-go get github.com/codingeasygo/bsck/bsrouter
-go get github.com/codingeasygo/bsck/bsconsole
+go get github.com/wfunc/bsck/bsrouter
+go get github.com/wfunc/bsck/bsconsole
 ```
 
 * install other command

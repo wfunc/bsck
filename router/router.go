@@ -13,15 +13,15 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/codingeasygo/util/converter"
-	"github.com/codingeasygo/util/xdebug"
-	"github.com/codingeasygo/util/xhash"
-	"github.com/codingeasygo/util/xio"
-	"github.com/codingeasygo/util/xio/frame"
-	"github.com/codingeasygo/util/xmap"
-	"github.com/codingeasygo/util/xnet"
-	"github.com/codingeasygo/util/xsort"
-	"github.com/codingeasygo/util/xtime"
+	"github.com/wfunc/util/converter"
+	"github.com/wfunc/util/xdebug"
+	"github.com/wfunc/util/xhash"
+	"github.com/wfunc/util/xio"
+	"github.com/wfunc/util/xio/frame"
+	"github.com/wfunc/util/xmap"
+	"github.com/wfunc/util/xnet"
+	"github.com/wfunc/util/xsort"
+	"github.com/wfunc/util/xtime"
 )
 
 const (

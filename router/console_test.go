@@ -15,8 +15,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/codingeasygo/util/converter"
-	"github.com/codingeasygo/util/proxy/socks"
+	"github.com/wfunc/util/converter"
+	"github.com/wfunc/util/proxy/socks"
 )
 
 func TestHosts(t *testing.T) {

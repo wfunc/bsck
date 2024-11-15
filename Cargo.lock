@@ -1107,7 +1107,7 @@ checksum = "62bb4feee49fdd9f707ef802e22365a35de4b7b299de4763d44bfea899442ff9"
 [[package]]
 name = "smoltcp"
 version = "0.9.1"
-source = "git+https://github.com/codingeasygo/smoltcp#cf28d7504a67b6940eb809d6fa3745d776a4bf3b"
+source = "git+https://github.com/wfunc/smoltcp#cf28d7504a67b6940eb809d6fa3745d776a4bf3b"
 dependencies = [
  "bitflags",
  "byteorder",

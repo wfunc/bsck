@@ -18,9 +18,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/codingeasygo/bsck/router"
-	"github.com/codingeasygo/util/proxy/socks"
-	"github.com/codingeasygo/util/xio"
+	"github.com/wfunc/bsck/router"
+	"github.com/wfunc/util/proxy/socks"
+	"github.com/wfunc/util/xio"
 )
 
 func init() {

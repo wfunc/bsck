@@ -13,12 +13,12 @@ import (
 	"sync"
 	"time"
 
-	"github.com/codingeasygo/bsck/dialer"
-	"github.com/codingeasygo/bsck/router"
-	"github.com/codingeasygo/util/proxy/socks"
-	"github.com/codingeasygo/util/xhttp"
-	"github.com/codingeasygo/util/xio"
-	"github.com/codingeasygo/util/xmap"
+	"github.com/wfunc/bsck/dialer"
+	"github.com/wfunc/bsck/router"
+	"github.com/wfunc/util/proxy/socks"
+	"github.com/wfunc/util/xhttp"
+	"github.com/wfunc/util/xio"
+	"github.com/wfunc/util/xmap"
 )
 
 func init() {

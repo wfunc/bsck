@@ -8,8 +8,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/codingeasygo/util/xio/frame"
-	"github.com/codingeasygo/util/xmap"
+	"github.com/wfunc/util/xio/frame"
+	"github.com/wfunc/util/xmap"
 )
 
 func TestUDPGW(t *testing.T) {

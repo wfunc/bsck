@@ -21,13 +21,13 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/codingeasygo/bsck/dialer"
-	"github.com/codingeasygo/util/proxy"
-	sproxy "github.com/codingeasygo/util/proxy/socks"
-	wproxy "github.com/codingeasygo/util/proxy/ws"
-	"github.com/codingeasygo/util/xhttp"
-	"github.com/codingeasygo/util/xio"
-	"github.com/codingeasygo/util/xmap"
+	"github.com/wfunc/bsck/dialer"
+	"github.com/wfunc/util/proxy"
+	sproxy "github.com/wfunc/util/proxy/socks"
+	wproxy "github.com/wfunc/util/proxy/ws"
+	"github.com/wfunc/util/xhttp"
+	"github.com/wfunc/util/xio"
+	"github.com/wfunc/util/xmap"
 	"golang.org/x/crypto/ssh"
 )
 
@@ -562,7 +562,7 @@ func (s *Service) Start() (err error) {
 		}
 	}
 	if len(s.Config.Console.SOCKS) > 0 {
-		_, err = s.Console.SOCKS.Start(s.Config.Console.SOCKS)
+		_, err = s.Console.SOCKS.Start("tcp", s.Config.Console.SOCKS)
 		if err != nil {
 			ErrorLog("Server(%v) start socks console on %v fail with %v\n", s.Name, s.Config.Console.SOCKS, err)
 			s.Node.Stop()
@@ -571,7 +571,7 @@ func (s *Service) Start() (err error) {
 		InfoLog("Server(%v) socks console listen on %v success", s.Name, s.Config.Console.SOCKS)
 	}
 	if len(s.Config.Console.WS) > 0 {
-		_, err = s.Console.WS.Start(s.Config.Console.WS)
+		_, err = s.Console.WS.Start("tcp", s.Config.Console.WS)
 		if err != nil {
 			ErrorLog("Server(%v) start ws console on %v fail with %v\n", s.Name, s.Config.Console.WS, err)
 			s.Node.Stop()

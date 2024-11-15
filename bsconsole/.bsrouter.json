@@ -1,0 +1,40 @@
+{
+    "name": "wfunc",
+    "listen": "",
+    "cert": "/Users/wfunc/go/src/github.com/wfunc/tmp/bsrouter.pem",
+    "key": "/Users/wfunc/go/src/github.com/wfunc/tmp/bsrouter.key",
+    "console": {
+	 "socks": ":1703"
+    },
+    "acl": {
+    },
+    "access": [
+        [
+            ".*",
+            ".*"
+        ]
+    ],
+    "dialer": {
+        "std": 1,
+	"ssh": 1
+    },
+    "forwards": {
+	"xjp4~proxy://": "hk253->xjp4"
+	},
+    "channels": {
+        "hk253": {
+            "enable": 1,
+            "remote": "tls://159.138.155.33:31103",
+            "token": "AAaabb1122",
+            "tls_verify": 0
+        },
+        "xjp4": {
+            "enable": 1,
+            "remote": "tls://190.92.213.4:31103",
+            "token": "AAaabb1122",
+            "tls_verify": 0
+        }
+    },
+    "showlog": 0,
+    "logflags": 16
+}
