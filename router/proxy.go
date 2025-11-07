@@ -41,6 +41,7 @@ type Proxy struct {
 	stopping       bool
 	exiter         chan int
 	waiter         sync.WaitGroup
+	channelLock    sync.RWMutex
 }
 
 // NewProxy will return new Proxy by name
@@ -56,6 +57,7 @@ func NewProxy(name string, bufferSize int, handler Handler) (px *Proxy) {
 		listenerLck: sync.RWMutex{},
 		exiter:      make(chan int, 10),
 		waiter:      sync.WaitGroup{},
+		channelLock: sync.RWMutex{},
 	}
 	px.Router.Handler = px
 	px.Router.BufferSize = bufferSize
@@ -330,7 +332,8 @@ func (p *Proxy) loadClientConfig(tlsCert, tlsKey, tlsCA, tlsVerify string) (conf
 
 // Keep will keep channel connection
 func (p *Proxy) Keep() (err error) {
-	for name, channel := range p.Channels {
+	channels := p.snapshotChannels()
+	for name, channel := range channels {
 		for {
 			connected := p.CountChannel(name)
 			keep := channel.IntDef(3, "keep")
@@ -350,6 +353,46 @@ func (p *Proxy) Keep() (err error) {
 		}
 	}
 	return
+}
+
+func (p *Proxy) snapshotChannels() map[string]xmap.M {
+	p.channelLock.RLock()
+	defer p.channelLock.RUnlock()
+	clone := make(map[string]xmap.M, len(p.Channels))
+	for name, channel := range p.Channels {
+		clone[name] = channel
+	}
+	return clone
+}
+
+// ReplaceChannels 替换全部通道配置
+func (p *Proxy) ReplaceChannels(channels map[string]xmap.M) {
+	p.channelLock.Lock()
+	defer p.channelLock.Unlock()
+	p.Channels = map[string]xmap.M{}
+	for name, channel := range channels {
+		p.Channels[name] = channel
+	}
+}
+
+// SetChannel 设置或更新单个通道配置
+func (p *Proxy) SetChannel(name string, channel xmap.M) {
+	p.channelLock.Lock()
+	defer p.channelLock.Unlock()
+	if p.Channels == nil {
+		p.Channels = map[string]xmap.M{}
+	}
+	p.Channels[name] = channel
+}
+
+// RemoveChannel 移除指定通道
+func (p *Proxy) RemoveChannel(name string) {
+	p.channelLock.Lock()
+	defer p.channelLock.Unlock()
+	if p.Channels == nil {
+		return
+	}
+	delete(p.Channels, name)
 }
 
 func (p *Proxy) dialConn(remote, proxy, tlsCert, tlsKey, tlsCA, tlsHost, tlsVerify string) (conn net.Conn, err error) {

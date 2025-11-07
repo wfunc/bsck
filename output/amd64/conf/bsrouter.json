@@ -1,0 +1,41 @@
+{
+    "name": "slaver",
+    "listen": "tls://:31103",
+    "cert": "bsrouter.pem",
+    "key": "bsrouter.key",
+    "console": {
+        "socks": "127.0.0.1:1701",
+        "ws": "127.0.0.1:1702"
+    },
+    "acl": {
+        "li": "417a86a1db37253651ddd408052411e910fb1694",
+        "wfunc": "417a86a1db37253651ddd408052411e910fb1694"
+    },
+    "access": [
+        [
+            ".*",
+            ".*"
+        ]
+    ],
+    "dialer": {
+        "std": 1,
+        "ssh": 1
+    },
+    "forwards": {},
+    "channels": {
+        "hk253": {
+            "enable": 1,
+            "remote": "tls://159.138.9.220:31103",
+            "token": "123",
+            "tls_verify": 0
+        },
+        "xjp4": {
+            "enable": 1,
+            "remote": "tls://124.243.178.95:31103",
+            "token": "123",
+            "tls_verify": 0
+        }
+    },
+    "showlog": 0,
+    "logflags": 16
+}

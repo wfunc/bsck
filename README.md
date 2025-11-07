@@ -5,6 +5,7 @@ bond socket provider a server/client channel like ssh tunneling, it can forward 
 ## Features
 * auto reconnect and keep alive between client to server.
 * control forward by dynamic uri like `node1->node2->tcp://xxxx:xx`
+* a lightweight web admin console for monitoring channels/slavers and editing channel config online.
 * port forward between multi node, it can be `normal client -> bsck server -> normal server` or `normal client -> bsck server -> bsck slaver -> normal server` or `normal client -> bsck client -> bsck server -> bsck slaver -> normal server` or ...
   * case1: `ssh client -> bsck client -> bsck server -> ssh server` for solving ssh connect lost frequently and ssh once to inner server.
   * case2: `browser -> bsck client -> bsck server -> web server` for browser to inner web server.
@@ -66,6 +67,27 @@ $GOPATH/bin/bsconsole install
   * `bs-sftp 'node1->tcp://xxx:22' -l root` start sftp to ssh server which after node1
 * `bs-scp <bsck uri> <scp options>` start scp connect
   * `bs-scp 'node1->tcp://xxx:22' xxx root@bshost:/tmp/` copy xxx file to server after node1, the `bshost` will be auto repealed.
+
+## 管理后台
+
+在 `bsrouter` 配置文件中新增 `admin` 块即可启用内置管理后台：
+
+```json
+{
+    "admin": {
+        "listen": ":5800",
+        "token": "change-me",
+        "username": "",
+        "password": ""
+    }
+}
+```
+
+* `listen`：监听地址，示例中为本地 5800 端口。
+* `token`：可选的访问令牌。前端请求会在 Header 携带 `X-Admin-Token`，也可在页面右上角设置。
+* `username`/`password`：可选的 Basic Auth 账号密码；与 `token` 可同时存在。
+
+访问 `http://<listen-address>/admin` 即可打开控制台，可查看各个 slave 通道的实时状态、连接数、延迟信息，并支持在线新增/删除通道，修改后会自动更新配置文件并触发节点保持连接。
 
 ## Configure
 ### configure file reference

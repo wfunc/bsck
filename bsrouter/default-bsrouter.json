@@ -8,5 +8,9 @@
     "dialer": {
         "standard": 1
     },
+    "admin": {
+        "listen": ":5800",
+        "token": "change-me"
+    },
     "log": 40
 }

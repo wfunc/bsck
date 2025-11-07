@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Bsck 管理后台</title>
+    <style>
+      body {
+        font-family: "Helvetica Neue", Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color: #f4f6f8;
+        color: #1f2a44;
+      }
+      header {
+        background-color: #202b45;
+        color: #fff;
+        padding: 16px 24px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      header h1 {
+        margin: 0;
+        font-size: 20px;
+      }
+      main {
+        padding: 24px;
+      }
+      button {
+        background-color: #3f51b5;
+        color: #fff;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 4px;
+        cursor: pointer;
+        margin-right: 12px;
+      }
+      button.secondary {
+        background-color: #607d8b;
+      }
+      table {
+        border-collapse: collapse;
+        width: 100%;
+        margin-top: 16px;
+        background-color: #fff;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+      }
+      th, td {
+        padding: 12px 16px;
+        border-bottom: 1px solid #e0e6ed;
+        text-align: left;
+      }
+      th {
+        background-color: #f0f3f9;
+        font-weight: 600;
+      }
+      tr:last-child td {
+        border-bottom: none;
+      }
+      .status-pill {
+        display: inline-block;
+        padding: 2px 10px;
+        border-radius: 12px;
+        font-size: 12px;
+        background-color: #e8f5e9;
+        color: #2e7d32;
+      }
+      .status-pill.offline {
+        background-color: #ffebee;
+        color: #c62828;
+      }
+      #channel-modal {
+        display: none;
+        position: fixed;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.45);
+        justify-content: center;
+        align-items: center;
+      }
+      #channel-modal .modal-content {
+        background: #fff;
+        padding: 24px;
+        border-radius: 8px;
+        width: 420px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+      }
+      #channel-modal label {
+        display: block;
+        margin-bottom: 6px;
+        font-weight: 600;
+      }
+      #channel-modal input {
+        width: 100%;
+        padding: 8px;
+        margin-bottom: 16px;
+        border: 1px solid #cfd8dc;
+        border-radius: 4px;
+      }
+      #empty {
+        text-align: center;
+        padding: 48px 0;
+        color: #607d8b;
+      }
+      .actions button {
+        margin-right: 8px;
+        background-color: #ef5350;
+      }
+      @media (max-width: 768px) {
+        table {
+          display: block;
+          overflow-x: auto;
+        }
+        header {
+          flex-wrap: wrap;
+          gap: 8px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>Bsck 管理后台</h1>
+      <div>
+        <button onclick="setToken()" class="secondary">设置访问令牌</button>
+        <button onclick="openModal()">新增通道</button>
+        <button onclick="loadData()" class="secondary">刷新</button>
+      </div>
+    </header>
+    <main>
+      <section>
+        <table id="channel-table">
+          <thead>
+            <tr>
+              <th>名称</th>
+              <th>远程地址</th>
+              <th>保持数</th>
+              <th>连接数</th>
+              <th>状态</th>
+              <th>最近连接</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody id="channel-body"></tbody>
+        </table>
+        <div id="empty" style="display: none;">暂无通道，请点击“新增通道”创建。</div>
+      </section>
+    </main>
+
+    <div id="channel-modal">
+      <div class="modal-content">
+        <h3 id="modal-title">新增通道</h3>
+        <label for="channel-name">通道名称</label>
+        <input id="channel-name" placeholder="例如：slaver-01" />
+        <label for="channel-remote">远程地址（支持 tcp:// / tls:// ...）</label>
+        <input id="channel-remote" placeholder="tcp://1.2.3.4:15023" />
+        <label for="channel-token">鉴权 Token</label>
+        <input id="channel-token" placeholder="请输入与远端一致的 token" />
+        <label for="channel-keep">保持连接数</label>
+        <input id="channel-keep" type="number" min="1" value="3" />
+        <div style="text-align: right;">
+          <button onclick="closeModal()" class="secondary">取消</button>
+          <button onclick="submitChannel()">保存</button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      let adminToken = localStorage.getItem("bsckAdminToken") || "";
+
+      function setToken() {
+        const value = prompt("请输入管理令牌 (若使用 Basic Auth 可留空)", adminToken);
+        if (value !== null) {
+          adminToken = value.trim();
+          localStorage.setItem("bsckAdminToken", adminToken);
+          loadData();
+        }
+      }
+
+      async function request(path, options = {}) {
+        const headers = options.headers || {};
+        if (adminToken) {
+          headers["X-Admin-Token"] = adminToken;
+        }
+        options.headers = headers;
+        const response = await fetch(path, options);
+        if (response.status === 401) {
+          throw new Error("未授权，请检查访问令牌或 Basic Auth 账号");
+        }
+        if (response.status === 204) {
+          return null;
+        }
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok) {
+          throw new Error(data.error || "请求失败");
+        }
+        return data;
+      }
+
+      function formatActive(active = []) {
+        if (!active.length) {
+          return "-";
+        }
+        return active
+          .map(
+            (item) =>
+              `${item.id ?? "-"} / ${item.ping?.speed ?? "-"} ms / ${new Date(
+                (item.ping?.last || 0) * 1000
+              ).toLocaleString()}`
+          )
+          .join("<br/>");
+      }
+
+      function fillTable(channels = []) {
+        const body = document.getElementById("channel-body");
+        const empty = document.getElementById("empty");
+        body.innerHTML = "";
+        if (!channels.length) {
+          empty.style.display = "block";
+          return;
+        }
+        empty.style.display = "none";
+        channels.forEach((item) => {
+          const tr = document.createElement("tr");
+          const config = item.config || {};
+          const remote = config.remote || config.remote_addr || "-";
+          const keep = config.keep || config.keep_max || 3;
+          const connected = item.connected || 0;
+          const statusClass = connected > 0 ? "status-pill" : "status-pill offline";
+          tr.innerHTML = `
+            <td>${item.name}</td>
+            <td>${remote}</td>
+            <td>${keep}</td>
+            <td>${connected}</td>
+            <td><span class="${statusClass}">${connected > 0 ? "在线" : "离线"}</span></td>
+            <td>${formatActive(item.active)}</td>
+            <td class="actions">
+              <button onclick="deleteChannel('${item.name}')">删除</button>
+            </td>
+          `;
+          body.appendChild(tr);
+        });
+      }
+
+      async function loadData() {
+        try {
+          const res = await request("/admin/api/slaves");
+          fillTable(res.channels || []);
+        } catch (err) {
+          alert(err.message);
+        }
+      }
+
+      function openModal() {
+        document.getElementById("channel-name").value = "";
+        document.getElementById("channel-remote").value = "";
+        document.getElementById("channel-token").value = "";
+        document.getElementById("channel-keep").value = 3;
+        document.getElementById("channel-modal").style.display = "flex";
+      }
+
+      function closeModal() {
+        document.getElementById("channel-modal").style.display = "none";
+      }
+
+      async function submitChannel() {
+        const name = document.getElementById("channel-name").value.trim();
+        const remote = document.getElementById("channel-remote").value.trim();
+        const token = document.getElementById("channel-token").value.trim();
+        const keep = parseInt(document.getElementById("channel-keep").value, 10) || 3;
+        if (!name || !remote || !token) {
+          alert("请填写完整的名称、远程地址和 token");
+          return;
+        }
+        try {
+          await request("/admin/api/slaves", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              name,
+              remote,
+              token,
+              keep,
+              enable: 1,
+            }),
+          });
+          closeModal();
+          loadData();
+        } catch (err) {
+          alert(err.message);
+        }
+      }
+
+      async function deleteChannel(name) {
+        if (!confirm(`确认删除通道 ${name} 吗？`)) {
+          return;
+        }
+        try {
+          await request(`/admin/api/slaves/${encodeURIComponent(name)}`, {
+            method: "DELETE",
+          });
+          loadData();
+        } catch (err) {
+          alert(err.message);
+        }
+      }
+
+      document.getElementById("channel-modal").addEventListener("click", (e) => {
+        if (e.target.id === "channel-modal") {
+          closeModal();
+        }
+      });
+
+      loadData();
+    </script>
+  </body>
+</html>

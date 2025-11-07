@@ -74,6 +74,14 @@ type Web struct {
 	Auth   string `json:"auth"`
 }
 
+// AdminConfig 为管理后台配置
+type AdminConfig struct {
+	Listen   string `json:"listen"`
+	Token    string `json:"token"`
+	Username string `json:"username"`
+	Password string `json:"password"`
+}
+
 // Config is struct for all configure
 type Config struct {
 	Name     string            `json:"name"`
@@ -95,6 +103,7 @@ type Config struct {
 	Dialer   xmap.M            `json:"dialer"`
 	RDPDir   string            `json:"rdp_dir"`
 	VNCDir   string            `json:"vnc_dir"`
+	Admin    AdminConfig       `json:"admin"`
 }
 
 // ReadConfig will read configure from file
@@ -111,6 +120,25 @@ func ReadConfig(filename string) (config *Config, last int64, err error) {
 	err = json.Unmarshal(configData, config)
 	if err != nil {
 		return
+	}
+	if config.Channels == nil {
+		config.Channels = map[string]xmap.M{}
+	}
+	if len(config.Channels) == 0 {
+		raw := map[string]interface{}{}
+		if xerr := json.Unmarshal(configData, &raw); xerr == nil {
+			if arr, ok := raw["channels"].([]interface{}); ok {
+				for idx, item := range arr {
+					if mv, ok := item.(map[string]interface{}); ok {
+						name := fmt.Sprintf("channel_%d", idx)
+						if nv, ok := mv["name"].(string); ok && len(strings.TrimSpace(nv)) > 0 {
+							name = strings.TrimSpace(nv)
+						}
+						config.Channels[name] = xmap.M(mv)
+					}
+				}
+			}
+		}
 	}
 	if len(config.Cert) < 1 && config.Insecure != 1 {
 		config.Cert = "bsrouter.pem"
@@ -170,6 +198,7 @@ type Service struct {
 	configLast int64
 	alias      map[string]string
 	aliasLock  sync.RWMutex
+	admin      *AdminServer
 }
 
 // NewService will return new Service
@@ -601,15 +630,29 @@ func (s *Service) Start() (err error) {
 		s.OnReady()
 	}
 	if len(s.Config.Channels) > 0 {
-		s.Node.Channels = s.Config.Channels
+		s.Node.ReplaceChannels(s.Config.Channels)
 	}
 	s.Node.Start()
+	if len(s.Config.Admin.Listen) > 0 {
+		s.admin = NewAdminServer(s)
+		err = s.admin.Start(s.Config.Admin)
+		if err != nil {
+			ErrorLog("Server(%v) start admin on %v fail with %v", s.Name, s.Config.Admin.Listen, err)
+			s.Stop()
+			return
+		}
+		InfoLog("Server(%v) admin listen on %v success", s.Name, s.Config.Admin.Listen)
+	}
 	return
 }
 
 // Stop will stop service
 func (s *Service) Stop() (err error) {
 	InfoLog("Server(%v) is stopping", s.Name)
+	if s.admin != nil {
+		s.admin.Stop()
+		s.admin = nil
+	}
 	if s.Node != nil {
 		s.Node.Stop()
 		s.Node = nil
@@ -625,6 +668,132 @@ func (s *Service) Stop() (err error) {
 	if s.Web != nil {
 		s.Web.Close()
 		s.Web = nil
+	}
+	return
+}
+
+// ChannelStatusList will return all channel status
+func (s *Service) ChannelStatusList() (list []ChannelStatus, err error) {
+	s.configLock.RLock()
+	defer s.configLock.RUnlock()
+	statusMap := map[string][]xmap.M{}
+	if s.Node != nil && s.Node.Router != nil {
+		runtime := s.Node.Router.DisplayChannel(xmap.M{})
+		for name, raw := range runtime {
+			statusMap[name] = xmap.WrapArray(raw)
+		}
+	}
+	seen := map[string]bool{}
+	if s.Config != nil && s.Config.Channels != nil {
+		for name, cfg := range s.Config.Channels {
+			status := ChannelStatus{Name: name, Config: cfg}
+			if active, ok := statusMap[name]; ok {
+				status.Active = active
+				status.Connected = len(active)
+			}
+			list = append(list, status)
+			seen[name] = true
+		}
+	}
+	for name, active := range statusMap {
+		if seen[name] {
+			continue
+		}
+		status := ChannelStatus{Name: name, Active: active, Connected: len(active)}
+		list = append(list, status)
+	}
+	return
+}
+
+// ChannelStatus will return channel status by name
+func (s *Service) ChannelStatus(name string) (status *ChannelStatus, err error) {
+	list, err := s.ChannelStatusList()
+	if err != nil {
+		return
+	}
+	for idx := range list {
+		if list[idx].Name == name {
+			status = &list[idx]
+			return
+		}
+	}
+	err = fmt.Errorf("channel %v not found", name)
+	return
+}
+
+// UpsertChannel will add or update channel configure
+func (s *Service) UpsertChannel(name string, cfg xmap.M) (err error) {
+	name = strings.TrimSpace(name)
+	if len(name) < 1 {
+		err = fmt.Errorf("channel name is required")
+		return
+	}
+	if cfg == nil {
+		cfg = xmap.M{}
+	}
+	s.configLock.Lock()
+	defer s.configLock.Unlock()
+	if s.Config == nil {
+		err = fmt.Errorf("config is nil")
+		return
+	}
+	if s.Config.Channels == nil {
+		s.Config.Channels = map[string]xmap.M{}
+	}
+	s.Config.Channels[name] = cfg
+	if s.Node != nil {
+		s.Node.SetChannel(name, cfg)
+	}
+	err = s.saveConfigLocked()
+	return
+}
+
+// RemoveChannel will remove channel configure
+func (s *Service) RemoveChannel(name string) (err error) {
+	name = strings.TrimSpace(name)
+	if len(name) < 1 {
+		err = fmt.Errorf("channel name is required")
+		return
+	}
+	s.configLock.Lock()
+	defer s.configLock.Unlock()
+	if s.Config == nil || s.Config.Channels == nil {
+		err = fmt.Errorf("channel %v not found", name)
+		return
+	}
+	if _, ok := s.Config.Channels[name]; !ok {
+		err = fmt.Errorf("channel %v not found", name)
+		return
+	}
+	delete(s.Config.Channels, name)
+	if s.Node != nil {
+		s.Node.RemoveChannel(name)
+		s.Node.Router.CloseChannel(name)
+	}
+	err = s.saveConfigLocked()
+	return
+}
+
+func (s *Service) saveConfigLocked() (err error) {
+	if len(s.ConfigPath) < 1 {
+		err = fmt.Errorf("config path is empty")
+		return
+	}
+	data, err := json.MarshalIndent(s.Config, "", "    ")
+	if err != nil {
+		return
+	}
+	tmp := s.ConfigPath + ".tmp"
+	err = os.WriteFile(tmp, data, 0644)
+	if err != nil {
+		return
+	}
+	err = os.Rename(tmp, s.ConfigPath)
+	if err != nil {
+		return
+	}
+	if stat, xerr := os.Stat(s.ConfigPath); xerr == nil {
+		s.configLast = stat.ModTime().Local().UnixNano() / 1e6
 	}
 	return
 }
